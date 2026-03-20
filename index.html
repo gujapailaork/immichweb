@@ -49,7 +49,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       transition: background 0.45s, color 0.45s;
-      cursor: none;
+      cursor: auto;
     }
 
     body::after {
@@ -66,20 +66,8 @@
     }
 
     /* ── CURSOR ──────────────────────────────────── */
-    .cursor-dot {
-      position: fixed; width: 6px; height: 6px;
-      background: var(--yellow); border-radius: 50%;
-      pointer-events: none; z-index: 9999;
-      transform: translate(-50%,-50%);
-    }
-    .cursor-ring {
-      position: fixed; width: 28px; height: 28px;
-      border: 1.5px solid rgba(255,210,0,0.4); border-radius: 50%;
-      pointer-events: none; z-index: 9998;
-      transform: translate(-50%,-50%);
-      transition: width 0.18s, height 0.18s, border-color 0.18s;
-    }
-    .cursor-ring.big { width: 46px; height: 46px; border-color: var(--yellow); }
+    .cursor-dot { display: none; }
+.cursor-ring { display: none; }
 
     /* ── HEADER ──────────────────────────────────── */
     header {
@@ -505,6 +493,18 @@
       <code>images/your-photo.jpg</code>
     </div>
     <div class="photo-grid" id="photo-grid"></div>
+    <div style="text-align:center; padding: 32px;">
+  <button id="load-more-btn" onclick="loadMore()" style="
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    background: var(--yellow); color: #07101e;
+    border: none; padding: 14px 48px; cursor: pointer;
+    clip-path: polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);
+    display: none;">
+    MORE ->
+  </button>
+</div>
   </section>
 
   <!-- FOOTER -->
@@ -678,67 +678,92 @@
       return;
     }
     renderAll();
+
+    if (IS_MOBILE) {
+  const btn = document.getElementById('load-more-btn');
+  const remaining = PHOTOS.length - PAGE_SIZE;
+  if (btn && remaining > 0) {
+    document.getElementById('remaining').textContent = remaining;
+    btn.style.display = 'inline-block';
+  }
+}
   });
 
   /* ── RENDER ──────────────────────────────────── */
-  function renderAll() {
-    const grid = document.getElementById('photo-grid');
-    grid.innerHTML = '';
+ const IS_MOBILE = window.innerWidth < 768;
+const PAGE_SIZE = 9;
+let currentPage = 0;
 
+function renderAll() {
+  currentPage = 0;
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+
+  if (IS_MOBILE) {
+    loadMore();
+  } else {
+    // คอม — แสดงทั้งหมดเลย
     PHOTOS.forEach((src, i) => {
-      const fname = src.split('/').pop();
-      const card  = document.createElement('div');
-      card.className = 'photo-card';
-      card.dataset.index = i;
-
-      card.innerHTML = `
-        <img src="${src}" alt="${fname}" loading="lazy"
-             onerror="this.closest('.photo-card').remove()"/>
-        <div class="photo-overlay">
-          <div class="photo-meta">
-            <div class="fname">${fname}</div>
-          </div>
-        </div>
-        <a class="dl-btn" href="${src}" download="${fname}"
-           title="Download" onclick="event.stopPropagation()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-        </a>`;
-
-      card.addEventListener('click', () => openLB(i));
+      const card = createCard(src, i);
       grid.appendChild(card);
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'scale(1)';
+      }, Math.min(i, 10) * 40);
     });
+  }
+}
 
-    setupReveal();
+function loadMore() {
+  const grid = document.getElementById('photo-grid');
+  const start = currentPage * PAGE_SIZE;
+  const end = PHOTOS.length; // กดทีเดียวโหลดที่เหลือทั้งหมด
+
+  for (let i = start; i < end; i++) {
+    const card = createCard(PHOTOS[i], i);
+    grid.appendChild(card);
+    setTimeout(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'scale(1)';
+    }, (i - start) * 30);
   }
 
-  /* ── SCROLL REVEAL ───────────────────────────── */
-  function setupReveal() {
-    // Use IntersectionObserver for ALL cards — no setTimeout limit.
-    // Cards in the viewport on load appear immediately (with a small
-    // stagger based on their position in the visible batch).
-    // Cards below the fold appear as the user scrolls to them.
-    let visibleBatch = 0;
+  currentPage = end;
+  const btn = document.getElementById('load-more-btn');
+  if (btn) btn.style.display = 'none';
+}
 
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const card = e.target;
-          const batchDelay = visibleBatch < 20 ? visibleBatch * 40 : 0;
-          visibleBatch++;
-          setTimeout(() => card.classList.add('visible'), batchDelay);
-          obs.unobserve(card);
-        }
-      });
-    }, { threshold: 0.04, rootMargin: '0px 0px 100px 0px' });
+function createCard(src, i) {
+  const fname = src.split('/').pop();
+  const card = document.createElement('div');
+  card.className = 'photo-card';
+  card.dataset.index = i;
+  card.style.opacity = '0';
+  card.style.transform = 'scale(0.96)';
+  card.style.transition = 'opacity 0.4s ease, transform 0.4s ease, box-shadow 0.28s';
+  card.innerHTML = `
+    <img src="${src}" alt="${fname}" loading="lazy"
+         onerror="this.style.opacity='0.2'"/>
+    <div class="photo-overlay">
+      <div class="photo-meta">
+        <div class="fname">${fname}</div>
+      </div>
+    </div>
+    <a class="dl-btn" href="${src}" download="${fname}"
+       title="Download" onclick="event.stopPropagation()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </a>`;
+  card.addEventListener('click', () => openLB(i));
+  return card;
+}
 
-    document.querySelectorAll('.photo-card').forEach(c => obs.observe(c));
-  }
+function setupReveal() {} // ไม่ใช้แล้ว
 
   /* ── LIGHTBOX (full uncropped image) ─────────── */
   let lbIdx = 0;
