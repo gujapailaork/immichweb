@@ -739,13 +739,13 @@ function loadMore() {
 
   for (let i = start; i < end; i++) {
     const card = createCard(PHOTOS[i], i);
-    grid.appendChild(card);
-    const delay = Math.min((i - start) * 30, 500);
-    card.style.opacity = '1';
-card.style.transform = 'scale(1)';
+    grid.appendChild(card); // append ก่อน
+    requestAnimationFrame(() => { // แล้วค่อย animate
+      card.style.opacity = '1';
+      card.style.transform = 'scale(1)';
+    });
   }
 
-  // ซ่อนปุ่ม "ดูทั้งหมด" แล้วแสดงปุ่ม "ย่อ"
   document.getElementById('load-more-btn').style.display = 'none';
   document.getElementById('show-less-btn').style.display = 'inline-block';
 }
