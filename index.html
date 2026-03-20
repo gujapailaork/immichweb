@@ -746,6 +746,8 @@ function loadMore() {
     });
   }
 
+  currentPage = Math.ceil(end / PAGE_SIZE);
+
   document.getElementById('load-more-btn').style.display = 'none';
   document.getElementById('show-less-btn').style.display = 'inline-block';
 }
