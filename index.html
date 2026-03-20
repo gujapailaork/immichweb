@@ -717,7 +717,7 @@ function renderAll() {
 function loadMore() {
   const grid = document.getElementById('photo-grid');
   const start = currentPage * PAGE_SIZE;
-  const end = PHOTOS.length; // กดทีเดียวโหลดที่เหลือทั้งหมด
+  const end = Math.min(start + PAGE_SIZE, PHOTOS.length);
 
   for (let i = start; i < end; i++) {
     const card = createCard(PHOTOS[i], i);
@@ -742,7 +742,7 @@ function createCard(src, i) {
   card.style.transform = 'scale(0.96)';
   card.style.transition = 'opacity 0.4s ease, transform 0.4s ease, box-shadow 0.28s';
   card.innerHTML = `
-    <img src="${src}" alt="${fname}" loading="lazy"
+    <img src="${src}" alt="${fname}"
          onerror="this.style.opacity='0.2'"/>
     <div class="photo-overlay">
       <div class="photo-meta">
