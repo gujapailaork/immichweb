@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VAULT — Gallery</title>
+  <title>MHZMMPRT PHOTO</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -447,7 +447,7 @@
 
   <!-- HEADER -->
   <header id="site-header">
-    <a class="logo" href="#"><span class="logo-b">[</span>VAULT<span class="logo-b">]</span></a>
+    <a class="logo" href="#"><span class="logo-b">[</span>PHOTO<span class="logo-b">]</span></a>
     <div class="header-right">
       <span class="header-stats" id="header-stats">PHOTO GALLERY</span>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
@@ -461,13 +461,13 @@
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
     <div class="hero-vline"></div>
-    <p class="hero-tag">// Personal Archive &nbsp;·&nbsp; Private &nbsp;·&nbsp; Yours</p>
+    <p class="hero-tag">// Personal Archive &nbsp;·&nbsp; Private &nbsp;·&nbsp; MAPHANG</p>
     <h1 class="hero-title">
-      YOUR<br/>
+      MAPHANG<br/>
       <span class="outline">PHOTO</span><br/>
       <span class="gold">VAULT.</span>
     </h1>
-    <p class="hero-sub">Every shot. Every moment. Exactly as captured.</p>
+    <p class="hero-sub">MEMORIES OF EVERY MOMENT</p>
     <div class="hero-actions">
       <button class="btn-primary" onclick="document.getElementById('gallery-section').scrollIntoView({behavior:'smooth'})">
         Browse Gallery
@@ -502,14 +502,25 @@
     border:none; padding:14px 48px; cursor:pointer;
     clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);
     display:none;">
-    ดูทั้งหมด (<span id="remaining"></span> รูป)
+    SEE MORE (<span id="remaining"></span>  PHOTO)
   </button>
+  <button id="show-less-btn" onclick="showLess()" style="
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.85rem; font-weight:700;
+  letter-spacing:0.2em; text-transform:uppercase;
+  background:transparent; color:var(--yellow);
+  border: 1px solid var(--yellow);
+  padding:14px 48px; cursor:pointer;
+  clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);
+  display:none;">
+  SEE LESS ↑
+</button>
 </div >
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <a class="logo" href="#" style="font-size:1.1rem"><span class="logo-b">[</span>VAULT<span class="logo-b">]</span></a>
+    <a class="logo" href="#" style="font-size:1.1rem"><span class="logo-b">[</span>PHOTO<span class="logo-b">]</span></a>
     <p>Private · Yours</p>
   </footer>
 
@@ -700,9 +711,25 @@ function renderAll() {
   grid.innerHTML = '';
 
   if (IS_MOBILE) {
-    loadMore();
+    // แสดงแค่ 9 รูปแรกก่อน
+    for (let i = 0; i < Math.min(PAGE_SIZE, PHOTOS.length); i++) {
+      const card = createCard(PHOTOS[i], i);
+      grid.appendChild(card);
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'scale(1)';
+      }, i * 40);
+    }
+    currentPage = 1;
+
+    // แสดงปุ่มถ้ายังมีรูปเหลือ
+    const btn = document.getElementById('load-more-btn');
+    const rem = document.getElementById('remaining');
+    if (btn && PHOTOS.length > PAGE_SIZE) {
+      if (rem) rem.textContent = PHOTOS.length - PAGE_SIZE;
+      btn.style.display = 'inline-block';
+    }
   } else {
-    // คอม — แสดงทั้งหมดเลย
     PHOTOS.forEach((src, i) => {
       const card = createCard(src, i);
       grid.appendChild(card);
@@ -716,21 +743,39 @@ function renderAll() {
 
 function loadMore() {
   const grid = document.getElementById('photo-grid');
-  const start = currentPage * PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, PHOTOS.length);
+  const start = grid.children.length;
+  const end = PHOTOS.length;
 
   for (let i = start; i < end; i++) {
     const card = createCard(PHOTOS[i], i);
     grid.appendChild(card);
+    const delay = Math.min((i - start) * 30, 500);
     setTimeout(() => {
       card.style.opacity = '1';
       card.style.transform = 'scale(1)';
-    }, (i - start) * 30);
+    }, delay);
   }
 
-  currentPage = end;
+  // ซ่อนปุ่ม "ดูทั้งหมด" แล้วแสดงปุ่ม "ย่อ"
+  document.getElementById('load-more-btn').style.display = 'none';
+  document.getElementById('show-less-btn').style.display = 'inline-block';
+}
+
+function showLess() {
+  currentPage = 1;
+  const grid = document.getElementById('photo-grid');
+  // ลบรูปที่เกิน 9 ออก
+  while (grid.children.length > PAGE_SIZE) {
+    grid.removeChild(grid.lastChild);
+  }
+  // สลับปุ่ม
+  document.getElementById('show-less-btn').style.display = 'none';
   const btn = document.getElementById('load-more-btn');
-  if (btn) btn.style.display = 'none';
+  const rem = document.getElementById('remaining');
+  if (rem) rem.textContent = PHOTOS.length - PAGE_SIZE;
+  btn.style.display = 'inline-block';
+  // scroll กลับขึ้นไปที่ gallery
+  document.getElementById('gallery-section').scrollIntoView({behavior:'smooth'});
 }
 
 function createCard(src, i) {
