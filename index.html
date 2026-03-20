@@ -493,18 +493,18 @@
       <code>images/your-photo.jpg</code>
     </div>
     <div class="photo-grid" id="photo-grid"></div>
-    <div style="text-align:center; padding: 32px;">
+    <div id="load-more-wrap" style="text-align:center; padding: 32px;">
   <button id="load-more-btn" onclick="loadMore()" style="
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem; font-weight: 700;
-    letter-spacing: 0.2em; text-transform: uppercase;
-    background: var(--yellow); color: #07101e;
-    border: none; padding: 14px 48px; cursor: pointer;
-    clip-path: polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);
-    display: none;">
-    MORE ->
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:0.85rem; font-weight:700;
+    letter-spacing:0.2em; text-transform:uppercase;
+    background:var(--yellow); color:#07101e;
+    border:none; padding:14px 48px; cursor:pointer;
+    clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);
+    display:none;">
+    ดูทั้งหมด (<span id="remaining"></span> รูป)
   </button>
-</div>
+</div >
   </section>
 
   <!-- FOOTER -->
