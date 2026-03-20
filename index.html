@@ -741,10 +741,8 @@ function loadMore() {
     const card = createCard(PHOTOS[i], i);
     grid.appendChild(card);
     const delay = Math.min((i - start) * 30, 500);
-    setTimeout(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'scale(1)';
-    }, delay);
+    card.style.opacity = '1';
+card.style.transform = 'scale(1)';
   }
 
   // ซ่อนปุ่ม "ดูทั้งหมด" แล้วแสดงปุ่ม "ย่อ"
