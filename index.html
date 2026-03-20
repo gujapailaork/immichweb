@@ -689,15 +689,6 @@
       return;
     }
     renderAll();
-
-    if (IS_MOBILE) {
-  const btn = document.getElementById('load-more-btn');
-  const remaining = PHOTOS.length - PAGE_SIZE;
-  if (btn && remaining > 0) {
-    document.getElementById('remaining').textContent = remaining;
-    btn.style.display = 'inline-block';
-  }
-}
   });
 
   /* ── RENDER ──────────────────────────────────── */
